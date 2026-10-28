@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Chọn hoa cầm tay</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600&display=swap">
+<style>
+:root{
+  --bg:#fbf6f3; --card:#ffffff; --text:#2a2224; --muted:#7a6b6f; --line:#eadfe0;
+  --accent:#c2446b; --chip:#f3e6e8; --chip-on:#c2446b; --chip-on-text:#fff;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#171214; --card:#231b1e; --text:#f4eaec; --muted:#a8979c; --line:#372b2f;
+    --accent:#ef7f9f; --chip:#2e2327; --chip-on:#ef7f9f; --chip-on-text:#2a1018; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#171214; --card:#231b1e; --text:#f4eaec; --muted:#a8979c; --line:#372b2f;
+  --accent:#ef7f9f; --chip:#2e2327; --chip-on:#ef7f9f; --chip-on-text:#2a1018; color-scheme:dark;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--text);font-family:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.5}
+[hidden]{display:none!important}
+button{font:inherit;color:inherit;cursor:pointer}
+.wrap{max-width:560px;margin:0 auto}
+h1{margin:0;font-size:24px;font-weight:600;line-height:1.3}
+h2{font-size:17px;font-weight:600;margin:26px 0 10px}
+.btn{border:0;background:var(--accent);color:var(--chip-on-text);padding:13px 20px;border-radius:99px;font-size:15px;font-weight:500;width:100%}
+.ghost{border:0;background:var(--chip);padding:9px 16px;border-radius:99px;font-size:14px}
+
+/* Trang giới thiệu */
+#intro{padding:22px 16px 48px}
+.lead{color:var(--muted);font-size:15px;margin:10px 0 16px}
+.guide{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:6px 16px}
+.guide ol{margin:8px 0;padding-left:20px;font-size:14px}
+.guide li{margin:7px 0}
+.mcard{background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden;margin-bottom:16px}
+.mimg{display:block;width:100%;height:300px;object-fit:contain;background:var(--chip)}
+.mbody{padding:14px 16px 16px}
+.mbody h3{margin:0 0 6px;font-size:17px;font-weight:600}
+.cnt{font-size:12px;color:var(--accent);background:var(--chip);padding:2px 9px;border-radius:99px;margin-left:6px;font-weight:500}
+.mbody p{margin:0 0 12px;font-size:14.5px}
+
+/* Bộ sưu tập */
+.top{display:flex;align-items:center;justify-content:space-between;padding:16px 14px 4px}
+.top h1{font-size:20px}
+.sub{margin:0;padding:0 16px;color:var(--muted);font-size:13px}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:12px 14px;position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);z-index:5;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;border:0;background:var(--chip);padding:9px 15px;border-radius:99px;font-size:14px}
+.chip.on{background:var(--chip-on);color:var(--chip-on-text);font-weight:500}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;padding:4px 14px 40px;max-width:760px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;text-align:left;padding:0;position:relative}
+.pic{aspect-ratio:4/5;width:100%;display:block;object-fit:cover;object-position:center 20%;background:var(--chip)}
+.tag{position:absolute;top:8px;left:8px;background:rgba(0,0,0,.55);color:#fff;font-size:12px;padding:2px 9px;border-radius:99px}
+.tag.r{left:auto;right:8px}
+.info{padding:10px 12px 12px}
+.mat{display:inline-block;font-size:12px;color:var(--accent);background:var(--chip);padding:2px 9px;border-radius:99px}
+.note{margin:7px 0 0;font-size:13px;color:var(--muted);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.note b,.big b{color:var(--accent);font-weight:600}
+
+/* Xem to, vuốt trái/phải */
+#viewer{position:fixed;inset:0;background:var(--bg);z-index:20;display:none;flex-direction:column}
+#viewer.open{display:flex}
+.vbar{display:flex;justify-content:space-between;align-items:center;padding:calc(10px + env(safe-area-inset-top,0px)) 14px 8px}
+#count{color:var(--muted);font-size:14px}
+#slides{flex:1;display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none}
+#slides::-webkit-scrollbar{display:none}
+.slide{flex:none;width:100%;scroll-snap-align:center;overflow-y:auto;padding:0 14px calc(24px + env(safe-area-inset-bottom,0px))}
+.slide img{display:block;width:100%;max-height:62vh;object-fit:contain;border-radius:16px;background:var(--chip);margin-bottom:10px}
+.slide .nm{font-size:19px;font-weight:600;margin:12px 0 4px}
+.big{margin:10px 0 0;padding:12px 14px;background:var(--chip);border-radius:14px;font-size:15.5px}
+.hint{text-align:center;color:var(--muted);font-size:12px;padding:0 0 6px;margin:0}
+</style>
+</head>
+<body>
+
+<div id="intro"><div class="wrap">
+  <h1>Chiến dịch lựa hoa cướiiiii 💐</h1>
+  <p class="lead">Có vài note xàm xí dô tri của Út iu. Note vui cho có cảm giác 2 chị em cùng nhao chọn hoa có thể để ý hoặc không ạ hihi haha hehe 🙈</p>
+  <h2>Cách xài (dễ ẹc)</h2>
+  <div class="guide"><ol>
+    <li>Lướt hết xuống tận đáy trang nha, Út dặn rồi á 😤 Bên dưới có Út review 5 loại chất liệu đó.</li>
+    <li>Xuống cuối có nút hồng bự chảng, bấm vô là tới bộ sưu tập hoa.</li>
+    <li>Trong đó có hàng nút lọc theo chất liệu (Ngọc trai, Lụa, Kẽm nhung, Len, Cườm), bấm “Tất cả” là coi full bộ.</li>
+    <li>Chạm vô ảnh để phóng to, rồi vuốt trái hoặc phải để lướt mẫu tiếp theo, y chang lướt tóp tóp 📱</li>
+    <li>Mê mẫu nào thì chụp màn hình gửi Út kèm số mẫu (kiểu “Mẫu 12”). Út note xàm sẵn rồi, đọc cho vui chứ không bắt phải nghe theo đâu 🤪</li>
+  </ol></div>
+
+  <h2>Út thấy mỗi loại hoa khi cô dâu cầm như sao?</h2>
+  <div id="mats"></div>
+  <p class="lead" style="text-align:center;margin-top:22px">Tới đây là hết phần Út review rồi á, giờ vô xem hoa thôi 🎉</p>
+  <button class="btn" data-go="">Vào xem hoa thôi nè →</button>
+</div></div>
+
+<div id="gallery" hidden>
+  <div class="top"><button class="ghost" id="back">← Về trang cảm nhận</button></div>
+  <div class="top" style="padding-top:8px"><h1>Tất cả mẫu</h1></div>
+  <p class="sub" id="total"></p>
+  <nav class="chips" id="chips"></nav>
+  <main class="grid" id="grid"></main>
+</div>
+
+<section id="viewer" aria-label="Xem mẫu hoa">
+  <div class="vbar"><button class="ghost" id="close">← Quay lại</button><span id="count"></span></div>
+  <div id="slides"></div>
+  <p class="hint">Vuốt trái / phải để lướt mẫu khác</p>
+</section>
+
+<script>
+var D={
+ "mats": [
+  {
+   "k": "Ngọc trai",
+   "e": "🤍",
+   "img": "images/anh-00.jpg",
+   "txt": "Út thấy đẹp, nhìn cũng sang á, nhưng mà lúc cô dâu cầm thì có mấy mẫu dễ bị chìm vô váy cưới, lên hình hong nổi bật lắm. Với cả hạt ngọc nếu hơi to với dày thì nhìn bó hoa có vẻ hơi thô, mà chắc cũng tùy mẫu hihi"
+  },
+  {
+   "k": "Lụa",
+   "e": "🌸",
+   "img": "images/anh-03.jpg",
+   "txt": "Út thấy hoa lụa nhìn khá giống hoa thật, cảm giác nhẹ nhàng, mềm mại. Nhìn chung thì sẽ theo hướng bánh bèo, nữ tính"
+  },
+  {
+   "k": "Kẽm nhung",
+   "e": "🌷",
+   "img": "images/anh-02.jpg",
+   "txt": "Út thấy hoa kẽm nhung khá đẹp á, tạo hình được nhiều kiểu hoa nhìn cũng xinh. Nhưng mà chất liệu này có nét hơi giống len nên tổng thể sẽ cute, đáng yêu một xíu, kết hợp giữa hoa thật với hoa len kiểu ko quá cute mà cũng ko quá thanh lịch"
+  },
+  {
+   "k": "Len",
+   "e": "🧶",
+   "img": "images/anh-01.jpg",
+   "txt": "Út thấy hoa len hơi nhí nhảnh xíu, nhìn dễ thương với ấm áp. Kể cả mấy mẫu làm theo kiểu sang sang thì chất liệu len vẫn có nét cute, nên cảm giác sẽ trẻ trung, gần gũi hơn là kiểu sang trọng tiểu thư tài phiệt kkk"
+  },
+  {
+   "k": "Cườm",
+   "e": "📿",
+   "img": "images/anh-04.jpg",
+   "txt": "Út hong thích chất liệu này lắm, tại Út thấy một số mẫu nhìn hơi sến, lúc cô dâu cầm lên nhìn hong đẹp. Mấy hạt cườm đính sẽ lộ nhìn hơi thô, nên Út nghĩ chất liệu này khá kén mẫu"
+  }
+ ],
+ "items": [
+  {
+   "n": "Mẫu 01",
+   "c": "Len",
+   "note": "tròn trong múp múp cũng cute nhìn như em bé kk",
+   "a": [
+    "images/anh-05.jpg"
+   ]
+  },
+  {
+   "n": "Mẫu 02",
+   "c": "Len",
+   "note": "đẹp nè mà vẫn hơi cute xíu nhìn cỡ gái 18",
+   "a": [
+    "images/anh-06.jpg"
+   ]
+  },
+  {
+   "n": "Mẫu 03",
+   "c": "Ngọc trai",
+   "note": "nhìn lần 1 thì đẹp lần 2 thì thấy sao hạt nó to vữ vị",
+   "a": [
+    "images/anh-07.jpg"
+   ]
+  },
+  {
+   "n": "Mẫu 04",
+   "c": "Ngọc trai",
+   "note": "hmm hoa trọc trai 1 lớp nhìn hơi mạnh mẽ cũng múp múp",
+   "a": [
+    "images/anh-08.jpg"
+   ]
+  },
+  {
+   "n": "Mẫu 05",
+   "c": "Ngọc trai",
+   "note": "cũng là ngọc trai mà 2 lớp nhìn bánh bèo nữ tính kk",
+   "a": [
+    "images/anh-09.jpg"
+   ]
+  },
+  {
+   "n": "Mẫu 06",
+   "c": "Kẽm nhung",
+   "note": "vừa bánh bèo mà cũng ko bánh bèo lắm dịu dịu",
+   "a": [
+    "images/anh-10.jpg"
+   ]
+  },
+  {
+   "n": "Mẫu 07",
+   "c": "Kẽm nhung",
+   "note": "phiên bản tua rua và nhiều hoa hơn của bản trước kkk",
+   "a": [
+    "images/anh-11.jpg"
+   ]
+  },
+  {
+   "n": "Mẫu 08",
+   "c": "Kẽm nhung",
+   "note": "cũng cũng",
+   "a": [
+    "images/b-11.jpg"
+   ]
+  },
+  {
+   "n": "Mẫu 09",
+   "c": "Kẽm nhung",
+   "note": "nhìn đơn giản mà lạ lạ kkk",
+   "a": [
+    "images/anh-13.jpg"
+   ]
+  },
+  {
+   "n": "Mẫu 10",
+   "c": "Kẽm nhung",
+   "note": "tua rua và bành chướng lãnh địa kkk",
+   "a": [
+    "images/anh-14.jpg"
+   ]
+  },
+  {
+   "n": "Mẫu 11",
+   "c": "Kẽm nhung",
+   "note": "cũng tua rua mà đỡ bành chướng hơn",
+   "a": [
+    "images/anh-15.jpg"
+   ]
+  },
+  {
+   "n": "Mẫu 12",
+   "c": "Lụa",
+   "note": "giống hoa cưới truyền thống nhìn cũng tinh tế nhẹ nhàng",
+   "a": [
+    "images/anh-16.jpg"
+   ]
+  },
+  {
+   "n": "Mẫu 13",
+   "c": "Lụa",
+   "note": "Quạt + hoa cưới lạ nha nhìn cũng slay quyền lực",
+   "a": [
+    "images/anh-17.jpg"
+   ]
+  },
+  {
+   "n": "Mẫu 14",
+   "c": "Lụa",
+   "note": "đỏ, cháy gu mẹ Phương",
+   "a": [
+    "images/anh-18.jpg"
+   ]
+  },
+  {
+   "n": "Mẫu 15",
+   "c": "Lụa",
+   "note": "nhìn độc độc lạ lạ hay hay mà chắc ko hợp gu người lớn",
+   "a": [
+    "images/anh-19.jpg"
+   ]
+  },
+  {
+   "n": "Mẫu 16",
+   "c": "Lụa",
+   "note": "lá ngọc cành vàng y cái tên",
+   "a": [
+    "images/anh-20.jpg"
+   ]
+  },
+  {
+   "n": "Mẫu 17",
+   "c": "Ngọc trai",
+   "note": "to bành chướng nè kkk",
+   "a": [
+    "images/anh-21.jpg",
+    "images/anh-22.jpg"
+   ]
+  },
+  {
+   "n": "Mẫu 18",
+   "c": "Kẽm nhung",
+   "note": "to và cute và màu hằm",
+   "a": [
+    "images/anh-23.jpg"
+   ]
+  },
+  {
+   "n": "Mẫu 19",
+   "c": "Kẽm nhung",
+   "note": "nhìn phú bà quá nè kk",
+   "a": [
+    "images/anh-24.jpg"
+   ]
+  },
+  {
+   "n": "Mẫu 20",
+   "c": "Cườm",
+   "note": "một từ thôi sến, gu bame chồng",
+   "a": [
+    "images/anh-25.jpg"
+   ]
+  },
+  {
+   "n": "Mẫu 21",
+   "c": "Ngọc trai",
+   "note": "vòng giáng sinh phiên bản ngọc trai",
+   "a": [
+    "images/anh-26.jpg"
+   ]
+  },
+  {
+   "n": "Mẫu 22",
+   "c": "Ngọc trai",
+   "note": "nhìn ngọc trai rất là Sao mai Sao hôm",
+   "a": [
+    "images/anh-27.jpg"
+   ]
+  },
+  {
+   "n": "Mẫu 23",
+   "c": "Lụa",
+   "note": "giống hoa cưới truyền thống mà cũng thanh lịch kiểu tiểu thư tài phiệt:)))",
+   "a": [
+    "images/anh-28.jpg"
+   ]
+  },
+  {
+   "n": "Mẫu 24",
+   "c": "Lụa",
+   "note": "màu hằm nhìn mong manh dễ vỡ",
+   "a": [
+    "images/anh-29.jpg"
+   ]
+  },
+  {
+   "n": "Mẫu 25",
+   "c": "Lụa",
+   "note": "nhìn thanh xuân vườn trường",
+   "a": [
+    "images/anh-30.jpg"
+   ]
+  },
+  {
+   "n": "Mẫu 26",
+   "c": "Cườm",
+   "note": "có thể do màu chất liệu nên nhìn hơi sến sến và lộ hạt",
+   "a": [
+    "images/anh-31.jpg"
+   ]
+  },
+  {
+   "n": "Mẫu 27",
+   "c": "Cườm",
+   "note": "nhẹ nhàng nè mà vẫn hơi lộ hạt thô thô",
+   "a": [
+    "images/anh-32.jpg"
+   ]
+  },
+  {
+   "n": "Mẫu 28",
+   "c": "Ngọc trai",
+   "note": "ngọc trai với ren cũng rất gì và này nọ đấy đáng cân nhắc",
+   "a": [
+    "images/b-00.jpg"
+   ]
+  },
+  {
+   "n": "Mẫu 29",
+   "c": "Ngọc trai",
+   "note": "tua rua và lộng lẫy nhìn tài phiệt kkk",
+   "a": [
+    "images/b-01.jpg"
+   ]
+  },
+  {
+   "n": "Mẫu 30",
+   "c": "Cườm",
+   "note": "sen màu hằm và sến chắc do cái màu cườm cơ địa nó z",
+   "a": [
+    "images/b-02.jpg"
+   ]
+  },
+  {
+   "n": "Mẫu 31",
+   "c": "Ngọc trai",
+   "note": "vòng ngọc trai giáng sinh phiên bản hạt bự tổ chảng",
+   "a": [
+    "images/b-03.jpg"
+   ]
+  },
+  {
+   "n": "Mẫu 32",
+   "c": "Ngọc trai",
+   "note": "bông hoa lai con sứa",
+   "a": [
+    "images/b-04.jpg"
+   ]
+  },
+  {
+   "n": "Mẫu 33",
+   "c": "Len",
+   "note": "Len với vòng ngọc nhìn cũng dịu mà hơi nhỏ",
+   "a": [
+    "images/b-05.jpg"
+   ]
+  },
+  {
+   "n": "Mẫu 34",
+   "c": "Len",
+   "note": "nhìn múp múp ngộ ngộ, nó cô Sang mà nó mẹ Phương",
+   "a": [
+    "images/b-06.jpg"
+   ]
+  },
+  {
+   "n": "Mẫu 35",
+   "c": "Len",
+   "note": "giống hoa cưới trong mấy bộ drama Hàn Quoắc",
+   "a": [
+    "images/b-07.jpg"
+   ]
+  },
+  {
+   "n": "Mẫu 36",
+   "c": "Len",
+   "note": "thiếu nữ 16 tuổi hồi xuân",
+   "a": [
+    "images/b-08.jpg"
+   ]
+  },
+  {
+   "n": "Mẫu 37",
+   "c": "Len",
+   "note": "màu với mẫu nhìn lạ nha, nhìn vừa trẻ vừa già",
+   "a": [
+    "images/b-09.jpg"
+   ]
+  },
+  {
+   "n": "Mẫu 38",
+   "c": "Len",
+   "note": "đại dương huyền bí vẫn cứ là mộng mị và cute kkk",
+   "a": [
+    "images/b-10.jpg"
+   ]
+  },
+  {
+   "n": "Mẫu 39",
+   "c": "Len",
+   "note": "hmm hợp với SMai lúc 15 tuổi",
+   "a": [
+    "images/b-12.jpg"
+   ]
+  },
+  {
+   "n": "Mẫu 40",
+   "c": "Ngọc trai",
+   "note": "Sen Ngọc Trai nhìn bí hiểm và múp múp kkk",
+   "a": [
+    "images/b-13.jpg"
+   ]
+  },
+  {
+   "n": "Mẫu 41",
+   "c": "Kẽm nhung",
+   "note": "nhìn đồ sộ màu hợp mệnh Kim",
+   "a": [
+    "images/b-14.jpg"
+   ]
+  },
+  {
+   "n": "Mẫu 42",
+   "c": "Kẽm nhung",
+   "note": "vibe cô Sang:)))",
+   "a": [
+    "images/b-15.jpg"
+   ]
+  },
+  {
+   "n": "Mẫu 43",
+   "c": "Kẽm nhung",
+   "note": "đơn giản mà hiệu quả",
+   "a": [
+    "images/b-16.jpg"
+   ]
+  },
+  {
+   "n": "Mẫu 44",
+   "c": "Kẽm nhung",
+   "note": "rất nhiều lan hồ điệp nhìn rất là bươm bướm:)))",
+   "a": [
+    "images/b-17.jpg"
+   ]
+  },
+  {
+   "n": "Mẫu 45",
+   "c": "Kẽm nhung",
+   "note": "nhìn rất là LowG và Dương Fyn",
+   "a": [
+    "images/b-18.jpg"
+   ]
+  },
+  {
+   "n": "Mẫu 46",
+   "c": "Kẽm nhung",
+   "note": "cũng rất là Dương Fyn",
+   "a": [
+    "images/b-19.jpg"
+   ]
+  },
+  {
+   "n": "Mẫu 47",
+   "c": "Kẽm nhung",
+   "note": "sến ạ",
+   "a": [
+    "images/b-20.jpg"
+   ]
+  },
+  {
+   "n": "Mẫu 48",
+   "c": "Kẽm nhung",
+   "note": "nhìn giả giả mà thật thật an toàn",
+   "a": [
+    "images/b-21.jpg"
+   ]
+  },
+  {
+   "n": "Mẫu 49",
+   "c": "Ngọc trai",
+   "note": "nhìn hoa ngọc trai rất là ngọc trai",
+   "a": [
+    "images/b-22.jpg"
+   ]
+  },
+  {
+   "n": "Mẫu 50",
+   "c": "Ngọc trai",
+   "note": "nhìn giàu giàu",
+   "a": [
+    "images/b-23.jpg"
+   ]
+  },
+  {
+   "n": "Mẫu 51",
+   "c": "Ngọc trai",
+   "note": "nhìn rất là vòng giáng sinh ông già nô en",
+   "a": [
+    "images/b-24.jpg"
+   ]
+  },
+  {
+   "n": "Mẫu 52",
+   "c": "Ngọc trai",
+   "note": "hmm hoa 5 cánh rỗng ruột:)))",
+   "a": [
+    "images/b-25.jpg"
+   ]
+  },
+  {
+   "n": "Mẫu 53",
+   "c": "Ngọc trai",
+   "note": "rỗng ruột và ren nhìn hơi nhỏ",
+   "a": [
+    "images/b-26.jpg"
+   ]
+  },
+  {
+   "n": "Mẫu 54",
+   "c": "Ngọc trai",
+   "note": "5 cái bình hoa",
+   "a": [
+    "images/b-27.jpg"
+   ]
+  },
+  {
+   "n": "Mẫu 55",
+   "c": "Lụa",
+   "note": "hơi đơn giản quá ko nhỉ mà nhìn gọn gàng",
+   "a": [
+    "images/c-00.jpg"
+   ]
+  },
+  {
+   "n": "Mẫu 56",
+   "c": "Lụa",
+   "note": "xinh nhìn mini cute cute",
+   "a": [
+    "images/c-01.jpg"
+   ]
+  },
+  {
+   "n": "Mẫu 57",
+   "c": "Lụa",
+   "note": "gu Út bánh bèo nàng thơ cũng to to",
+   "a": [
+    "images/c-02.jpg"
+   ]
+  },
+  {
+   "n": "Mẫu 58",
+   "c": "Lụa",
+   "note": "vừa nhẹ nhàng mà mạnh mẽ nhìn dịu hơn kẽm nhung",
+   "a": [
+    "images/c-03.jpg"
+   ]
+  },
+  {
+   "n": "Mẫu 59",
+   "c": "Lụa",
+   "note": "nhìn phù thủy ưng nha",
+   "a": [
+    "images/c-04.jpg"
+   ]
+  },
+  {
+   "n": "Mẫu 60",
+   "c": "Lụa",
+   "note": "đơn giản và ma mị",
+   "a": [
+    "images/c-05.jpg"
+   ]
+  },
+  {
+   "n": "Mẫu 61",
+   "c": "Lụa",
+   "note": "phòng trường hợp chị mình thích Hello Kitty",
+   "a": [
+    "images/c-06.jpg"
+   ]
+  },
+  {
+   "n": "Mẫu 62",
+   "c": "Lụa",
+   "note": "Quạt và Hoa nhìn hiện đại mà dân gian mà đẹp",
+   "a": [
+    "images/c-07.jpg"
+   ]
+  },
+  {
+   "n": "Mẫu 63",
+   "c": "Lụa",
+   "note": "gu cô dâu sợ mỏi tay",
+   "a": [
+    "images/c-08.jpg"
+   ]
+  },
+  {
+   "n": "Mẫu 64",
+   "c": "Lụa",
+   "note": "lá ngọc cành vàng có ngọc trai nữa ưng nha",
+   "a": [
+    "images/c-09.jpg"
+   ]
+  },
+  {
+   "n": "Mẫu 65",
+   "c": "Lụa",
+   "note": "mặc dù ngọc trai nhiều hơn lụa nhưng mà thích xếp vào lụa, nhìn nó đám cưới mà nó giáng sinh",
+   "a": [
+    "images/c-10.jpg"
+   ]
+  },
+  {
+   "n": "Mẫu 66",
+   "c": "Lụa",
+   "note": "cô dâu tay yếu sợ mỏi tay có thể lấy mẫu này",
+   "a": [
+    "images/c-11.jpg"
+   ]
+  },
+  {
+   "n": "Mẫu 67",
+   "c": "Lụa",
+   "note": "hmm bố cục nó hoạt hình",
+   "a": [
+    "images/c-12.jpg"
+   ]
+  },
+  {
+   "n": "Mẫu 68",
+   "c": "Lụa",
+   "note": "nhìn rũ rượt cũng thấy cưng",
+   "a": [
+    "images/c-13.jpg"
+   ]
+  },
+  {
+   "n": "Mẫu 69",
+   "c": "Lụa",
+   "note": "đơn giản và hiệu quả",
+   "a": [
+    "images/c-14.jpg"
+   ]
+  },
+  {
+   "n": "Mẫu 70",
+   "c": "Lụa",
+   "note": "my gu",
+   "a": [
+    "images/c-15.jpg"
+   ]
+  },
+  {
+   "n": "Mẫu 71",
+   "c": "Lụa",
+   "note": "nhìn sang sang lạ lạ mà quyền lực",
+   "a": [
+    "images/d-00.jpg"
+   ]
+  },
+  {
+   "n": "Mẫu 72",
+   "c": "Cườm",
+   "note": "hello kitty babyboo",
+   "a": [
+    "images/d-01.jpg"
+   ]
+  }
+ ]
+};
+var ITEMS=D.items, MATS=D.mats, current="Tất cả", list=[];
+function $(id){return document.getElementById(id)}
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function cnt(k){return ITEMS.filter(function(m){return m.c===k}).length}
+
+/* Trang giới thiệu */
+$("mats").innerHTML=MATS.map(function(m){
+  return '<section class="mcard"><img class="mimg" alt="'+esc(m.k)+'" src="'+m.img+'"><div class="mbody">'+
+    '<h3>'+m.e+' '+esc(m.k)+'<span class="cnt">'+cnt(m.k)+' mẫu</span></h3><p>'+esc(m.txt)+'</p>'+'</div></section>';
+}).join("");
+$("intro").addEventListener("click",function(e){var b=e.target.closest("[data-go]"); if(b) openGallery(b.getAttribute("data-go")||"Tất cả")});
+
+/* Bộ sưu tập */
+function openGallery(c){current=c; $("intro").hidden=true; $("gallery").hidden=false; renderChips(); renderGrid(); window.scrollTo(0,0)}
+$("back").onclick=function(){$("gallery").hidden=true; $("intro").hidden=false; window.scrollTo(0,0)};
+function renderChips(){
+  var el=$("chips"), names=["Tất cả"].concat(MATS.map(function(m){return m.k}));
+  el.innerHTML=names.map(function(k){
+    var n=k==="Tất cả"?ITEMS.length:cnt(k);
+    return '<button class="chip'+(k===current?' on':'')+'" data-c="'+esc(k)+'">'+esc(k)+' ('+n+')</button>';
+  }).join("");
+  el.onclick=function(e){var b=e.target.closest(".chip"); if(!b) return; current=b.getAttribute("data-c"); renderChips(); renderGrid(); window.scrollTo(0,0)};
+}
+function renderGrid(){
+  list=ITEMS.filter(function(m){return current==="Tất cả"||m.c===current});
+  $("total").textContent=list.length+" mẫu · chạm vô ảnh để phóng to";
+  $("grid").innerHTML=list.map(function(m,i){
+    return '<button class="card" data-i="'+i+'"><img class="pic" loading="lazy" alt="'+esc(m.n)+'" src="'+m.a[0]+'">'+
+      '<span class="tag">'+esc(m.n)+'</span>'+(m.a.length>1?'<span class="tag r">'+m.a.length+' ảnh</span>':'')+
+      '<div class="info"><span class="mat">'+esc(m.c)+'</span><p class="note"><b>Út:</b> '+esc(m.note)+'</p></div></button>';
+  }).join("");
+}
+$("grid").onclick=function(e){var c=e.target.closest(".card"); if(c) openViewer(+c.getAttribute("data-i"))};
+
+/* Xem to */
+var viewer=$("viewer"), slides=$("slides");
+function openViewer(i){
+  slides.innerHTML=list.map(function(m){
+    return '<article class="slide">'+m.a.map(function(u){return '<img alt="'+esc(m.n)+'" src="'+u+'">'}).join("")+
+      '<p class="nm">'+esc(m.n)+' · <span class="mat">'+esc(m.c)+'</span></p>'+
+      '<p class="big"><b>Út:</b> '+esc(m.note)+'</p></article>';
+  }).join("");
+  viewer.classList.add("open"); document.body.style.overflow="hidden";
+  slides.scrollLeft=i*slides.clientWidth; upd();
+}
+function upd(){var w=slides.clientWidth||1; $("count").textContent=(Math.round(slides.scrollLeft/w)+1)+" / "+list.length}
+slides.addEventListener("scroll",upd);
+function closeViewer(){viewer.classList.remove("open"); document.body.style.overflow=""}
+$("close").onclick=closeViewer;
+document.addEventListener("keydown",function(e){
+  if(!viewer.classList.contains("open")) return;
+  if(e.key==="Escape") closeViewer();
+  if(e.key==="ArrowRight") slides.scrollBy({left:slides.clientWidth,behavior:"smooth"});
+  if(e.key==="ArrowLeft") slides.scrollBy({left:-slides.clientWidth,behavior:"smooth"});
+});
+</script>
+</body>
+</html>
